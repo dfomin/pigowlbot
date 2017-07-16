@@ -3,12 +3,13 @@ package main
 import (
 	"log"
 	"net/http"
+	"pigowlbot/token"
 
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI("MyAwesomeBotToken")
+	bot, err := tgbotapi.NewBotAPI(token.BotToken)
 	if err != nil {
 		log.Fatal(err)
 	}
