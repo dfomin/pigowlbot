@@ -8,6 +8,7 @@ import (
 	"pigowlbot/sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"gopkg.in/telegram-bot-api.v4"
 )
@@ -72,6 +73,17 @@ func main() {
 	go http.ListenAndServeTLS(":8443", "fullchain.pem", "privkey.pem", nil)
 
 	for update := range updates {
-		log.Printf("%+v\n", update)
+		command := update.Message.Command()
+		switch command {
+		case "getpackages":
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getPackages())
+			bot.Send(msg)
+		case "getweeklydownloads":
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getDownloads(time.Now().Add(-7*24*time.Hour).Truncate(24*time.Hour).Unix()))
+			bot.Send(msg)
+		case "getdailydownloads":
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getDownloads(time.Now().Truncate(24*time.Hour).Unix()))
+			bot.Send(msg)
+		}
 	}
 }
