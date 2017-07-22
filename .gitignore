@@ -1,5 +1,5 @@
 .idea/
 pkg/
 bin/
-token.go
+private.go
 *.pem
