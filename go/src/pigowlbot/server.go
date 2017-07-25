@@ -54,6 +54,25 @@ func getDownloads(period int64) string {
 	return "There were not any downloads :'("
 }
 
+func timer(channel chan int) {
+	for {
+		//time.Sleep(10 * time.Minute)
+		time.Sleep(time.Second * 5)
+		channel <- 0
+	}
+}
+
+func subscribe(bot *tgbotapi.BotAPI, chatID int64) {
+	lastDownloadsTimestamp := time.Now().Unix()
+	timerChannel := make(chan int)
+	go timer(timerChannel)
+	for _ = range timerChannel {
+		msg := tgbotapi.NewMessage(chatID, getDownloads(lastDownloadsTimestamp))
+		lastDownloadsTimestamp = time.Now().Unix()
+		bot.Send(msg)
+	}
+}
+
 func main() {
 	bot, err := tgbotapi.NewBotAPI(private.BotToken)
 	if err != nil {
@@ -72,6 +91,8 @@ func main() {
 	updates := bot.ListenForWebhook("/")
 	go http.ListenAndServeTLS(":88", "fullchain.pem", "privkey.pem", nil)
 
+	subscribers := make(map[int64]bool)
+
 	for update := range updates {
 		command := update.Message.Command()
 		switch command {
@@ -84,6 +105,12 @@ func main() {
 		case "getdailydownloads":
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getDownloads(time.Now().Truncate(24*time.Hour).Unix()))
 			bot.Send(msg)
+		case "subscribe":
+			_, exist := subscribers[update.Message.Chat.ID]
+			if !exist {
+				go subscribe(bot, update.Message.Chat.ID)
+				subscribers[update.Message.Chat.ID] = true
+			}
 		}
 	}
 }
