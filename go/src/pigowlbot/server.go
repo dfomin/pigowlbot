@@ -51,13 +51,13 @@ func getDownloads(period int64) string {
 	if len(result) > 0 {
 		return strings.Join(result, "\n")
 	}
-	return "There were not any downloads :'("
+	return ""
 }
 
 func timer(channel chan int) {
 	for {
-		//time.Sleep(10 * time.Minute)
-		time.Sleep(time.Second * 5)
+		time.Sleep(10 * time.Minute)
+		//time.Sleep(time.Second * 5)
 		channel <- 0
 	}
 }
@@ -67,9 +67,13 @@ func subscribe(bot *tgbotapi.BotAPI, chatID int64) {
 	timerChannel := make(chan int)
 	go timer(timerChannel)
 	for _ = range timerChannel {
-		msg := tgbotapi.NewMessage(chatID, getDownloads(lastDownloadsTimestamp))
+		downloads := getDownloads(lastDownloadsTimestamp)
 		lastDownloadsTimestamp = time.Now().Unix()
-		bot.Send(msg)
+
+		if len(downloads) > 0 {
+			msg := tgbotapi.NewMessage(chatID, downloads)
+			bot.Send(msg)
+		}
 	}
 }
 
