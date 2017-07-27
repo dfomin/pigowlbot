@@ -33,7 +33,26 @@ func getPackagesName() map[int]string {
 	return packageIdNameMap
 }
 
-func getDownloads(period int64) string {
+func formatDownloadsMessage(sortedMap *sort.SortedMap) string {
+	var result []string
+	for _, v := range sortedMap.Keys {
+		result = append(result, v + ", " + strconv.Itoa(sortedMap.Original[v]))
+	}
+	if len(result) > 0 {
+		return strings.Join(result,"\n")
+	}
+	return ""
+}
+
+func formatDiffDownloadsMessage(updatedMap *sort.SortedMap, dailyMap *sort.SortedMap) string {
+	var result []string
+	for _, v := range updatedMap.Keys {
+		result = append(result, v + ", " + strconv.Itoa(updatedMap.Original[v]) + " (" + strconv.Itoa(dailyMap.Original[v]) + ")")
+	}
+	return strings.Join(result,"\n")
+}
+
+func getDownloads(period int64) *sort.SortedMap {
 	packageIdNameMap := getPackagesName()
 	packsStatResponse := api.GetPackagesStatistics()
 
@@ -44,14 +63,7 @@ func getDownloads(period int64) string {
 		}
 	}
 
-	var result []string
-	for _, v := range sort.SortedKeys(downloadsMap) {
-		result = append(result, v+", "+strconv.Itoa(downloadsMap[v]))
-	}
-	if len(result) > 0 {
-		return strings.Join(result, "\n")
-	}
-	return ""
+	return sort.SortedKeys(downloadsMap)
 }
 
 func timer(channel chan int) {
@@ -71,7 +83,7 @@ func subscribe(bot *tgbotapi.BotAPI, chatID int64) {
 		lastDownloadsTimestamp = time.Now().Unix()
 
 		if len(downloads) > 0 {
-			msg := tgbotapi.NewMessage(chatID, downloads)
+			msg := tgbotapi.NewMessage(chatID, formatDiffDownloadsMessage(downloads, getDownloads(time.Now().Truncate(24 * time.Hour).Unix())))
 			bot.Send(msg)
 		}
 	}
@@ -104,10 +116,13 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getPackages())
 			bot.Send(msg)
 		case "getweeklydownloads":
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getDownloads(time.Now().Add(-7*24*time.Hour).Truncate(24*time.Hour).Unix()))
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, formatDownloadsMessage(getDownloads(time.Now().Add(-7*24*time.Hour).Truncate(24*time.Hour).Unix())))
 			bot.Send(msg)
 		case "getdailydownloads":
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getDownloads(time.Now().Truncate(24*time.Hour).Unix()))
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, formatDownloadsMessage(getDownloads(time.Now().Truncate(24*time.Hour).Unix())))
+			bot.Send(msg)
+		case "getalldownloads":
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, formatDownloadsMessage(getDownloads(0)))
 			bot.Send(msg)
 		case "subscribe":
 			_, exist := subscribers[update.Message.Chat.ID]
