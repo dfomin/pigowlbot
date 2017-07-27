@@ -109,6 +109,9 @@ func main() {
 		case "getdailydownloads":
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getDownloads(time.Now().Truncate(24*time.Hour).Unix()))
 			bot.Send(msg)
+		case "getalldownloads":
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getDownloads(0))
+			bot.Send(msg)
 		case "subscribe":
 			_, exist := subscribers[update.Message.Chat.ID]
 			if !exist {
