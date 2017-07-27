@@ -36,10 +36,10 @@ func getPackagesName() map[int]string {
 func formatDownloadsMessage(sortedMap *sort.SortedMap) string {
 	var result []string
 	for _, v := range sortedMap.Keys {
-		result = append(result, v + ", " + strconv.Itoa(sortedMap.Original[v]))
+		result = append(result, v+", "+strconv.Itoa(sortedMap.Original[v]))
 	}
 	if len(result) > 0 {
-		return strings.Join(result,"\n")
+		return strings.Join(result, "\n")
 	}
 	return ""
 }
@@ -47,19 +47,19 @@ func formatDownloadsMessage(sortedMap *sort.SortedMap) string {
 func formatDiffDownloadsMessage(updatedMap *sort.SortedMap, dailyMap *sort.SortedMap) string {
 	var result []string
 	for _, v := range updatedMap.Keys {
-		result = append(result, v + ", " + strconv.Itoa(updatedMap.Original[v]) + " (" + strconv.Itoa(dailyMap.Original[v]) + ")")
+		result = append(result, v+", "+strconv.Itoa(updatedMap.Original[v])+" ("+strconv.Itoa(dailyMap.Original[v])+")")
 	}
-	return strings.Join(result,"\n")
+	return strings.Join(result, "\n")
 }
 
 func getDownloads(period int64) *sort.SortedMap {
-	packageIdNameMap := getPackagesName()
+	packageIDNameMap := getPackagesName()
 	packsStatResponse := api.GetPackagesStatistics()
 
 	downloadsMap := make(map[string]int)
 	for _, packStat := range packsStatResponse.PacksStat {
 		if packStat.Timestamp >= period {
-			downloadsMap[packageIdNameMap[packStat.ID]]++
+			downloadsMap[packageIDNameMap[packStat.ID]]++
 		}
 	}
 
@@ -82,8 +82,8 @@ func subscribe(bot *tgbotapi.BotAPI, chatID int64) {
 		downloads := getDownloads(lastDownloadsTimestamp)
 		lastDownloadsTimestamp = time.Now().Unix()
 
-		if len(downloads) > 0 {
-			msg := tgbotapi.NewMessage(chatID, formatDiffDownloadsMessage(downloads, getDownloads(time.Now().Truncate(24 * time.Hour).Unix())))
+		if len(downloads.Keys) > 0 {
+			msg := tgbotapi.NewMessage(chatID, formatDiffDownloadsMessage(downloads, getDownloads(time.Now().Truncate(24*time.Hour).Unix())))
 			bot.Send(msg)
 		}
 	}
