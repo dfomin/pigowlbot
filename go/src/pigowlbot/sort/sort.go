@@ -4,32 +4,32 @@ import (
 	"sort"
 )
 
-type sortedMap struct {
-	m map[string]int
-	s []string
+type SortedMap struct {
+    Original map[string]int
+    Keys []string
 }
 
-func (sm *sortedMap) Len() int {
-	return len(sm.m)
+func (sm *SortedMap) Len() int {
+    return len(sm.Original)
 }
 
-func (sm *sortedMap) Less(i, j int) bool {
-	return sm.m[sm.s[i]] > sm.m[sm.s[j]]
+func (sm *SortedMap) Less(i, j int) bool {
+    return sm.Original[sm.Keys[i]] > sm.Original[sm.Keys[j]]
 }
 
-func (sm *sortedMap) Swap(i, j int) {
-	sm.s[i], sm.s[j] = sm.s[j], sm.s[i]
+func (sm *SortedMap) Swap(i, j int) {
+    sm.Keys[i], sm.Keys[j] = sm.Keys[j], sm.Keys[i]
 }
 
-func SortedKeys(m map[string]int) []string {
-	sm := new(sortedMap)
-	sm.m = m
-	sm.s = make([]string, len(m))
-	i := 0
-	for key, _ := range m {
-		sm.s[i] = key
-		i++
-	}
-	sort.Sort(sm)
-	return sm.s
+func SortedKeys(m map[string]int) *SortedMap {
+    sm := new(SortedMap)
+    sm.Original = m
+    sm.Keys = make([]string, len(m))
+    i := 0
+    for key, _ := range m {
+        sm.Keys[i] = key
+        i++
+    }
+    sort.Sort(sm)
+    return sm
 }
