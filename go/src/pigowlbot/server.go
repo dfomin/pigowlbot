@@ -49,7 +49,10 @@ func formatDiffDownloadsMessage(updatedMap *sort.SortedMap, dailyMap *sort.Sorte
 	for _, v := range updatedMap.Keys {
 		result = append(result, v+", "+strconv.Itoa(updatedMap.Original[v])+" ("+strconv.Itoa(dailyMap.Original[v])+")")
 	}
-	return strings.Join(result, "\n")
+	if len(result) > 0 {
+		return strings.Join(result, "\n")
+	}
+	return "There were not any downloads :'("
 }
 
 func getDownloads(period int64) *sort.SortedMap {
