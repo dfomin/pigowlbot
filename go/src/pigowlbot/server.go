@@ -41,7 +41,7 @@ func formatDownloadsMessage(sortedMap *sort.SortedMap) string {
 	if len(result) > 0 {
 		return strings.Join(result, "\n")
 	}
-	return ""
+	return "There were not any downloads :'("
 }
 
 func formatDiffDownloadsMessage(updatedMap *sort.SortedMap, dailyMap *sort.SortedMap) string {
