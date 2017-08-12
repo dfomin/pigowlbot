@@ -113,6 +113,10 @@ func main() {
 
 	//subscribers := make(map[int64]bool)
 	dbc := database.Init()
+	subscribers := dbc.GetSubscribers()
+	for _, subscriber := range subscribers {
+		go subscribe(bot, subscriber)
+	}
 
 	for update := range updates {
 		command := update.Message.Command()
