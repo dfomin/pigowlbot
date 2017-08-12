@@ -4,13 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"pigowlbot/private"
 	_ "github.com/lib/pq"
-)
-
-const (
-	DB_USER     = "test"
-	DB_PASSWORD = "test"
-	DB_NAME     = "test"
 )
 
 // Controller represents controller for database
@@ -20,7 +15,7 @@ type Controller struct {
 
 // InitDatabase represents database initialization
 func Init() *Controller {
-        dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
+        dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", private.DB_USER, private.DB_PASSWORD, private.DB_NAME)
         db, err := sql.Open("postgres", dbinfo)
         checkErr(err)
 
@@ -42,13 +37,13 @@ func (c *Controller) CheckSubscriber(chatId int64) bool {
 	query := "SELECT exists (SELECT * FROM chat where chat_id=$1)"
 	err := c.DataBase.QueryRow(query, chatId).Scan(&exists)
 	if err != nil && err != sql.ErrNoRows {
-        	log.Fatalf("error checking if row exists '%s' %v", chatId, err)
+		log.Fatalf("error checking if row exists '%s' %v", chatId, err)
 	}
 	return exists
 }
 
 func checkErr(err error) {
 	if err != nil {
-		log.Fatal(err)        
+		log.Fatal(err)
 	}
 }
