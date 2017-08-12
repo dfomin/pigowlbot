@@ -43,7 +43,7 @@ func (c *Controller) CheckSubscriber(chatId int64) bool {
 }
 
 func (c *Controller) GetSubscribers() []int64 {
-	rows, err := c.DataBase.Query("SELECT * FROM golang.chat")
+	rows, err := c.DataBase.Query("SELECT * FROM chat")
 	checkErr(err)
 
 	var result []int64
