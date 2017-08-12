@@ -42,6 +42,21 @@ func (c *Controller) CheckSubscriber(chatId int64) bool {
 	return exists
 }
 
+func (c *Controller) GetSubscribers() []int64 {
+	rows, err := c.DataBase.Query("SELECT * FROM chat")
+	checkErr(err)
+
+	var result []int64
+	for rows.Next() {
+		var id int
+		var chatId int64
+		err = rows.Scan(&id, &chatId)
+		checkErr(err)
+		result = append(result, chatId)
+	}
+	return result
+}
+
 func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
