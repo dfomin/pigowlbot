@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"pigowlbot/api"
+//	"pigowlbot/database"
 	"pigowlbot/private"
 	"pigowlbot/sort"
 	"strconv"
@@ -111,6 +112,7 @@ func main() {
 	go http.ListenAndServeTLS(":88", "fullchain.pem", "privkey.pem", nil)
 
 	subscribers := make(map[int64]bool)
+	//dbc := database.Init()
 
 	for update := range updates {
 		command := update.Message.Command()
@@ -129,9 +131,11 @@ func main() {
 			bot.Send(msg)
 		case "subscribe":
 			_, exist := subscribers[update.Message.Chat.ID]
+			//exist := dbc.CheckSubscriber(update.Message.Chat.ID)
 			if !exist {
 				go subscribe(bot, update.Message.Chat.ID)
 				subscribers[update.Message.Chat.ID] = true
+				//dbc.AddSubscriber(update.Message.Chat.ID)
 			}
 		}
 	}
