@@ -119,7 +119,11 @@ func main() {
 	}
 
 	for update := range updates {
-		command := update.Message.Command()
+		message := update.Message
+		if message == nil {
+			continue
+		}
+		command := message.Command()
 		switch command {
 		case "getpackages":
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getPackages())
