@@ -14,12 +14,21 @@ import (
 	"gopkg.in/telegram-bot-api.v4"
 )
 
+const boldPrefix = "**"
+
+func formatPackageName(name string, paid bool) string {
+	if paid {
+		return boldPrefix + name + boldPrefix
+	}
+	return name
+}
+
 func getPackages() string {
 	response := api.GetPackages()
 
 	var parts []string
 	for _, pack := range response.Packs {
-		parts = append(parts, pack.Pack.Name)
+		parts = append(parts, formatPackageName(pack.Pack.Name, pack.Pack.Paid))
 	}
 	return strings.Join(parts, "\n")
 }
@@ -29,7 +38,7 @@ func getPackagesName() map[int]string {
 
 	packsResponse := api.GetPackages()
 	for _, pack := range packsResponse.Packs {
-		packageIdNameMap[pack.Pack.ID] = pack.Pack.Name
+		packageIdNameMap[pack.Pack.ID] = formatPackageName(pack.Pack.Name, pack.Pack.Paid)
 	}
 	return packageIdNameMap
 }
@@ -37,7 +46,7 @@ func getPackagesName() map[int]string {
 func formatDownloadsMessage(sortedMap *sort.SortedMap) string {
 	var result []string
 	for _, v := range sortedMap.Keys {
-		result = append(result, v+", "+strconv.Itoa(sortedMap.Original[v]))
+		result = append(result, v + ", " + strconv.Itoa(sortedMap.Original[v]))
 	}
 	if len(result) > 0 {
 		return strings.Join(result, "\n")
@@ -48,7 +57,7 @@ func formatDownloadsMessage(sortedMap *sort.SortedMap) string {
 func formatDiffDownloadsMessage(updatedMap *sort.SortedMap, dailyMap *sort.SortedMap) string {
 	var result []string
 	for _, v := range updatedMap.Keys {
-		result = append(result, v+", "+strconv.Itoa(updatedMap.Original[v])+" ("+strconv.Itoa(dailyMap.Original[v])+")")
+		result = append(result, v + ", " + strconv.Itoa(updatedMap.Original[v]) + " (" + strconv.Itoa(dailyMap.Original[v]) + ")")
 	}
 	if len(result) > 0 {
 		return strings.Join(result, "\n")
@@ -87,7 +96,7 @@ func subscribe(bot *tgbotapi.BotAPI, chatID int64) {
 		lastDownloadsTimestamp = time.Now().Unix()
 
 		if len(downloads.Keys) > 0 {
-			msg := tgbotapi.NewMessage(chatID, formatDiffDownloadsMessage(downloads, getDownloads(time.Now().Truncate(24*time.Hour).Unix())))
+			msg := tgbotapi.NewMessage(chatID, formatDiffDownloadsMessage(downloads, getDownloads(time.Now().Truncate(24 * time.Hour).Unix())))
 			bot.Send(msg)
 		}
 	}
@@ -129,10 +138,10 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, getPackages())
 			bot.Send(msg)
 		case "getweeklydownloads":
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, formatDownloadsMessage(getDownloads(time.Now().Add(-7*24*time.Hour).Truncate(24*time.Hour).Unix())))
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, formatDownloadsMessage(getDownloads(time.Now().Add(-7 * 24 * time.Hour).Truncate(24 * time.Hour).Unix())))
 			bot.Send(msg)
 		case "getdailydownloads":
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, formatDownloadsMessage(getDownloads(time.Now().Truncate(24*time.Hour).Unix())))
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, formatDownloadsMessage(getDownloads(time.Now().Truncate(24 * time.Hour).Unix())))
 			bot.Send(msg)
 		case "getalldownloads":
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, formatDownloadsMessage(getDownloads(0)))
