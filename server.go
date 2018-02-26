@@ -97,6 +97,7 @@ func subscribe(bot *tgbotapi.BotAPI, chatID int64) {
 
 		if len(downloads.Keys) > 0 {
 			msg := tgbotapi.NewMessage(chatID, formatDiffDownloadsMessage(downloads, getDownloads(time.Now().Truncate(24 * time.Hour).Unix())))
+			msg.ParseMode = tgbotapi.ModeMarkdown
 			bot.Send(msg)
 		}
 	}
